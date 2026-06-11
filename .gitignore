@@ -1,0 +1,43 @@
+# ── Personal config (contains your PII) ──────────────────────────────────────
+# Copy config.example.yaml → config.yaml and fill in your details.
+config.yaml
+
+# ── Pipeline outputs (may contain your resume, emails, application history) ──
+output/
+
+# ── Python ────────────────────────────────────────────────────────────────────
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# ── Node ──────────────────────────────────────────────────────────────────────
+node_modules/
+
+# ── Environment / secrets ─────────────────────────────────────────────────────
+.env
+.env.*
+*.key
+*.pem
+
+# ── Project-specific exclusions ──────────────────────────────────────────────
+job_hunter.zip        # old archive — contains config.yaml with PII inside it
+.claude/              # local Claude Code settings (machine-specific)
+
+# ── OS junk ───────────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+Thumbs.db
+desktop.ini
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo

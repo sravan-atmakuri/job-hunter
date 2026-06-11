@@ -1,0 +1,73 @@
+# ── config.example.yaml ───────────────────────────────────────────────────────
+# Copy this file to config.yaml and fill in your personal details.
+#   cp config.example.yaml config.yaml
+# config.yaml is in .gitignore and will never be committed.
+
+# ── Job search ────────────────────────────────────────────────────────────────
+job_titles:
+  - "Senior QA Engineer"
+  - "Senior QA Lead"
+  - "Test Engineer"
+  - "Salesforce Developer"
+  - "Salesforce Administrator"
+
+target_states:
+  - "FL"
+  - "Remote"
+  - "Orlando, FL"
+
+work_type:            # options: remote, onsite, hybrid, any
+  - "remote"
+  - "hybrid"
+
+job_types:            # options: contract, full-time, part-time, temporary
+  - "contract"        # includes C2C and C2H
+  - "full-time"
+
+visa_types:           # filter/flag jobs that reject these visa types
+  - "h1b"
+
+# ── Resume files (use absolute paths) ────────────────────────────────────────
+# Base resume — used as fallback when no role-specific match is found
+resume_path: "/path/to/your/resume.docx"
+
+# Role-specific resumes — the system picks the best match per job title
+resume_map:
+  qa:         "/path/to/your/qa_resume.docx"
+  salesforce: "/path/to/your/salesforce_resume.docx"
+  datacloud:  "/path/to/your/datacloud_resume.docx"
+
+# ── Relevance thresholds ──────────────────────────────────────────────────────
+min_relevance_score: 6     # 1–10; jobs below this are skipped
+min_hourly_rate: 60        # minimum $/hr for contract roles
+min_annual_salary: 100000  # minimum $/yr for salaried roles
+max_days_old: 30           # ignore postings older than this many days
+
+# ── Scraper settings ──────────────────────────────────────────────────────────
+max_jobs_per_source: 50
+request_delay_seconds: 4   # increase to 6-8 if you hit LinkedIn 429 errors
+
+# ── Job sources to scrape (comment out any to disable) ───────────────────────
+sources:
+  - linkedin
+  - dice
+  - simplyhired
+  - monster
+  - idealist       # nonprofit-focused job board
+
+# ── Claude model for resume tailoring ────────────────────────────────────────
+anthropic_model: "claude-opus-4-6"
+
+# ── Optional: company career pages to scrape directly ────────────────────────
+company_pages:
+  # - name: "Stripe"
+  #   url: "https://stripe.com/jobs/search"
+
+# ── Your contact info (used to fill application forms) ───────────────────────
+applicant:
+  first_name:   "Jane"
+  last_name:    "Doe"
+  email:        "jane.doe@example.com"
+  phone:        "555-123-4567"
+  linkedin_url: "https://www.linkedin.com/in/yourprofile"
+  location:     "City, ST"       # e.g. "Orlando, FL"

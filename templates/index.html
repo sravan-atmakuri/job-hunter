@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Job Hunter — ATS Resume Tailor</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f4f8;color:#1e293b;min-height:100vh}
+
+/* ── Header ── */
+.header{background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%);color:#fff;padding:20px 40px;display:flex;align-items:center;gap:16px;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.header-icon{font-size:32px}
+.header h1{font-size:22px;font-weight:700;letter-spacing:-.3px}
+.header p{font-size:13px;opacity:.65;margin-top:2px}
+.header-right{margin-left:auto;text-align:right;font-size:12px;opacity:.6}
+
+/* ── Step bar ── */
+.stepbar{background:#fff;border-bottom:1px solid #e2e8f0;padding:0 40px}
+.stepbar-inner{max-width:900px;margin:0 auto;display:flex;align-items:center}
+.step-item{display:flex;align-items:center;padding:18px 0;position:relative;cursor:default}
+.step-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;transition:.2s}
+.step-item.done .step-dot{background:#10b981;color:#fff}
+.step-item.active .step-dot{background:#3b82f6;color:#fff;box-shadow:0 0 0 4px rgba(59,130,246,.2)}
+.step-item.pending .step-dot{background:#e2e8f0;color:#94a3b8}
+.step-label{margin-left:10px;font-size:13px;font-weight:600;white-space:nowrap}
+.step-item.done .step-label{color:#10b981}
+.step-item.active .step-label{color:#3b82f6}
+.step-item.pending .step-label{color:#94a3b8}
+.step-line{flex:1;height:2px;background:#e2e8f0;margin:0 16px;min-width:32px}
+.step-line.done{background:#10b981}
+
+/* ── Main ── */
+.main{max-width:900px;margin:28px auto;padding:0 24px 60px}
+
+/* ── Cards ── */
+.card{background:#fff;border-radius:14px;padding:28px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:20px}
+.card-title{font-size:16px;font-weight:700;margin-bottom:20px;color:#0f172a;display:flex;align-items:center;gap:8px}
+.card-title .badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;background:#dbeafe;color:#1d4ed8}
+
+/* ── Form ── */
+.form-group{margin-bottom:18px}
+label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:7px}
+input[type=text],input[type=url],textarea,select{width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:9px;font-size:14px;font-family:inherit;color:#0f172a;background:#fff;transition:.18s}
+input:focus,textarea:focus,select:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+textarea{min-height:140px;resize:vertical;line-height:1.6}
+.input-row{display:flex;gap:10px}
+.input-row input{flex:1}
+
+/* ── Buttons ── */
+.btn{padding:10px 22px;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:7px;transition:.18s;white-space:nowrap}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:#3b82f6;color:#fff}
+.btn-primary:hover:not(:disabled){background:#2563eb}
+.btn-success{background:#10b981;color:#fff}
+.btn-success:hover:not(:disabled){background:#059669}
+.btn-danger{background:#ef4444;color:#fff}
+.btn-danger:hover:not(:disabled){background:#dc2626}
+.btn-outline{background:#fff;color:#374151;border:1.5px solid #d1d5db}
+.btn-outline:hover:not(:disabled){background:#f9fafb;border-color:#9ca3af}
+.btn-lg{padding:13px 28px;font-size:15px}
+.btn-sm{padding:6px 14px;font-size:12px}
+.action-bar{display:flex;justify-content:space-between;align-items:center;padding-top:22px;border-top:1px solid #f1f5f9;margin-top:6px}
+
+/* ── Resume selector ── */
+.resume-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:16px}
+.resume-card{border:2px solid #e2e8f0;border-radius:11px;padding:14px 16px;cursor:pointer;transition:.18s;display:flex;align-items:flex-start;gap:12px}
+.resume-card:hover{border-color:#93c5fd;background:#f8faff}
+.resume-card.selected{border-color:#3b82f6;background:#eff6ff}
+.resume-card input[type=radio]{display:none}
+.resume-card-icon{font-size:26px;flex-shrink:0;margin-top:2px}
+.resume-card-label{font-size:14px;font-weight:600;color:#0f172a}
+.resume-card-name{font-size:11px;color:#94a3b8;margin-top:3px;word-break:break-all}
+.resume-card-missing{font-size:11px;color:#ef4444;margin-top:3px}
+
+/* ── Dropzone ── */
+.dropzone{border:2px dashed #cbd5e1;border-radius:11px;padding:28px;text-align:center;cursor:pointer;transition:.18s}
+.dropzone:hover,.dropzone.drag-over{border-color:#3b82f6;background:#eff6ff}
+.dropzone-text{font-size:13px;color:#64748b;margin-top:6px}
+.dropzone-text strong{color:#3b82f6}
+
+/* ── ATS Score ring ── */
+.ats-header{display:flex;align-items:center;gap:28px;padding:20px 0 24px;flex-wrap:wrap}
+.score-ring-wrap{flex-shrink:0}
+.score-ring-wrap svg text{font-family:inherit}
+.ats-info{flex:1;min-width:200px}
+.ats-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8;margin-bottom:4px}
+.ats-recommendation{font-size:14px;color:#334155;line-height:1.55;margin-top:8px;padding:10px 14px;background:#f8faff;border-radius:8px;border-left:3px solid #3b82f6}
+
+/* ── Keyword chips ── */
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
+.chip{padding:4px 11px;border-radius:20px;font-size:12px;font-weight:500}
+.chip-green{background:#d1fae5;color:#065f46}
+.chip-red{background:#fee2e2;color:#991b1b}
+.chip-blue{background:#dbeafe;color:#1e40af}
+.chip-gray{background:#f1f5f9;color:#475569}
+
+/* ── Diff / edit view ── */
+.diff-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:4px}
+@media(max-width:640px){.diff-grid{grid-template-columns:1fr}}
+.diff-pane{border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden}
+.diff-pane-head{padding:9px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:6px}
+.diff-original .diff-pane-head{background:#fff7ed;color:#92400e;border-bottom:1px solid #fed7aa}
+.diff-tailored .diff-pane-head{background:#ecfdf5;color:#065f46;border-bottom:1px solid #a7f3d0}
+.diff-pane textarea{width:100%;border:none;padding:12px 14px;font-size:13.5px;line-height:1.6;resize:vertical;min-height:110px;font-family:inherit;color:#1e293b;background:transparent}
+.diff-pane textarea:focus{outline:none;box-shadow:none}
+.diff-pane textarea[readonly]{background:#fafafa;color:#64748b;cursor:default}
+
+/* ── Bullets editor ── */
+.bullets-section{margin-top:6px}
+.bullet-row{display:flex;gap:8px;margin-bottom:8px;align-items:flex-start}
+.bullet-num{width:22px;height:22px;border-radius:50%;background:#3b82f6;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:9px}
+.bullet-num.gray{background:#94a3b8}
+.bullet-row textarea{flex:1;min-height:54px;font-size:13px;resize:none;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px}
+.bullet-row textarea:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+.bullet-row textarea[readonly]{background:#f8fafc;color:#64748b;cursor:default;border-color:#f1f5f9}
+.bullets-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #f1f5f9}
+.bullets-col{padding:14px}
+
+/* ── Tabs ── */
+.tabs{display:flex;gap:0;border-bottom:2px solid #e2e8f0;margin-bottom:22px}
+.tab{padding:10px 18px;font-size:13px;font-weight:600;color:#64748b;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:.15s}
+.tab:hover{color:#3b82f6}
+.tab.active{color:#3b82f6;border-bottom-color:#3b82f6}
+
+/* ── Apply status ── */
+.apply-log{background:#0f172a;border-radius:10px;padding:18px;font-family:'SF Mono',Menlo,monospace;font-size:12.5px;min-height:120px;max-height:260px;overflow-y:auto;margin-top:16px}
+.log-line{padding:3px 0;line-height:1.5;display:flex;align-items:flex-start;gap:8px}
+.log-line .ts{color:#475569;flex-shrink:0}
+.log-line.info .msg{color:#94a3b8}
+.log-line.warn .msg{color:#fbbf24}
+.log-line.ok .msg{color:#34d399}
+.log-line.err .msg{color:#f87171}
+.log-line.nav .msg{color:#60a5fa}
+
+/* ── Result card ── */
+.result-card{border:2px solid #e2e8f0;border-radius:12px;padding:20px;display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.result-card.success{border-color:#10b981;background:#f0fdf4}
+.result-card.error{border-color:#ef4444;background:#fef2f2}
+.result-card.warn{border-color:#f59e0b;background:#fffbeb}
+.result-card.pending{border-color:#3b82f6;background:#eff6ff}
+.result-icon{font-size:36px;flex-shrink:0}
+.result-title{font-size:16px;font-weight:700}
+.result-body{font-size:13px;color:#475569;margin-top:4px}
+
+/* ── Platform badge ── */
+.platform-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;background:#dbeafe;color:#1e40af}
+
+/* ── Alerts ── */
+.alert{padding:12px 16px;border-radius:9px;font-size:13px;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px}
+.alert-info{background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8}
+.alert-warn{background:#fffbeb;border:1px solid #fde68a;color:#92400e}
+.alert-success{background:#f0fdf4;border:1px solid #bbf7d0;color:#14532d}
+
+/* ── Spinner ── */
+.spin{display:inline-block;width:16px;height:16px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+.spin.dark{border-color:rgba(59,130,246,.2);border-top-color:#3b82f6}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Panel show/hide ── */
+.panel{display:none}
+.panel.active{display:block}
+
+/* ── Divider ── */
+hr.divider{border:none;border-top:1px solid #f1f5f9;margin:20px 0}
+
+/* ── Skill meters ── */
+.skill-meter{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.skill-name{font-size:12px;font-weight:500;color:#334155;min-width:140px}
+.skill-bar{flex:1;height:7px;background:#e2e8f0;border-radius:4px;overflow:hidden}
+.skill-bar-fill{height:100%;border-radius:4px;background:#3b82f6;transition:width .6s ease}
+
+/* ── Section heading ── */
+.section-head{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid #f1f5f9}
+
+@media(max-width:700px){
+  .header{padding:16px 20px}.header h1{font-size:18px}
+  .stepbar{padding:0 16px}.main{padding:0 12px 40px}
+  .ats-header{flex-direction:column;align-items:flex-start;gap:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<header class="header">
+  <div class="header-icon">🎯</div>
+  <div>
+    <h1>Job Hunter — ATS Resume Tailor</h1>
+    <p>Paste a job link → get an ATS-optimized resume → auto-apply</p>
+  </div>
+  <div class="header-right" id="applicantInfo"></div>
+</header>
+
+<!-- ══ STEP BAR ══ -->
+<div class="stepbar">
+  <div class="stepbar-inner">
+    <div class="step-item active" id="si1">
+      <div class="step-dot">1</div>
+      <div class="step-label">Job Details</div>
+    </div>
+    <div class="step-line" id="sl1"></div>
+    <div class="step-item pending" id="si2">
+      <div class="step-dot">2</div>
+      <div class="step-label">ATS Analysis</div>
+    </div>
+    <div class="step-line" id="sl2"></div>
+    <div class="step-item pending" id="si3">
+      <div class="step-dot">3</div>
+      <div class="step-label">Review &amp; Apply</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MAIN ══ -->
+<main class="main">
+
+  <!-- ─────────────────── STEP 1: JOB DETAILS ─────────────────── -->
+  <div class="panel active" id="step1">
+    <div class="card">
+      <div class="card-title">
+        🔗 Job URL
+        <span class="badge">Step 1 of 3</span>
+      </div>
+
+      <div class="form-group">
+        <label>Job Posting URL</label>
+        <div class="input-row">
+          <input type="url" id="jobUrl" placeholder="https://www.linkedin.com/jobs/view/... or dice.com/jobs/... or any portal" />
+          <button class="btn btn-outline" id="fetchBtn" onclick="fetchJob()">
+            <span id="fetchBtnTxt">Fetch</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="fetchAlert" style="display:none"></div>
+
+      <div class="form-group">
+        <label>Job Title</label>
+        <input type="text" id="jobTitle" placeholder="e.g. Senior Salesforce Developer" />
+      </div>
+
+      <div class="form-group">
+        <label>Company</label>
+        <input type="text" id="jobCompany" placeholder="e.g. Acme Corp" />
+      </div>
+
+      <div class="form-group">
+        <label>Job Description <span style="font-weight:400;text-transform:none;color:#94a3b8">(auto-filled or paste manually)</span></label>
+        <textarea id="jobDescription" placeholder="Paste the full job description here, or click Fetch to auto-extract from the URL above..."></textarea>
+      </div>
+
+      <div class="action-bar">
+        <div></div>
+        <button class="btn btn-primary btn-lg" onclick="goToStep2()">
+          Continue → Resume Setup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────── STEP 2: ATS ANALYSIS ─────────────────── -->
+  <div class="panel" id="step2">
+
+    <!-- Resume selection -->
+    <div class="card" id="resumeSelCard">
+      <div class="card-title">📄 Choose Your Resume <span class="badge">Step 2 of 3</span></div>
+
+      <div class="section-head">Select base resume</div>
+      <div class="resume-grid" id="resumeGrid"></div>
+
+      <hr class="divider">
+      <div class="section-head">Or upload a different .docx</div>
+      <div class="dropzone" id="dropzone" onclick="document.getElementById('resumeFileInput').click()"
+           ondragover="event.preventDefault();this.classList.add('drag-over')"
+           ondragleave="this.classList.remove('drag-over')"
+           ondrop="handleDrop(event)">
+        <div style="font-size:36px">📁</div>
+        <div class="dropzone-text">Click or drag &amp; drop a <strong>.docx</strong> resume here</div>
+        <input type="file" id="resumeFileInput" accept=".docx" style="display:none" onchange="handleFileSelect(event)">
+      </div>
+      <div id="uploadedResumeBadge" style="display:none;margin-top:12px"></div>
+
+      <div class="action-bar">
+        <button class="btn btn-outline" onclick="goToStep(1)">← Back</button>
+        <button class="btn btn-primary btn-lg" id="analyzeBtn" onclick="runAnalysis()">
+          <span id="analyzeBtnTxt">Analyze with AI</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ATS Results (shown after analysis) -->
+    <div id="atsResults" style="display:none">
+
+      <!-- Score + summary -->
+      <div class="card">
+        <div class="card-title">📊 ATS Analysis Results</div>
+        <div class="ats-header">
+          <div class="score-ring-wrap">
+            <svg id="scoreRingSvg" width="110" height="110" viewBox="0 0 110 110">
+              <circle cx="55" cy="55" r="44" fill="none" stroke="#e2e8f0" stroke-width="10"/>
+              <circle id="scoreArc" cx="55" cy="55" r="44" fill="none" stroke="#3b82f6"
+                stroke-width="10" stroke-linecap="round"
+                stroke-dasharray="276.46" stroke-dashoffset="276.46"
+                transform="rotate(-90 55 55)" style="transition:stroke-dashoffset 1s ease"/>
+              <text x="55" y="51" text-anchor="middle" font-size="26" font-weight="700" fill="#0f172a" id="scoreNum">—</text>
+              <text x="55" y="67" text-anchor="middle" font-size="12" fill="#94a3b8">/10</text>
+            </svg>
+          </div>
+          <div class="ats-info">
+            <div class="ats-label" id="jobPillLabel">Analyzing…</div>
+            <div id="atsRecommendation" class="ats-recommendation" style="display:none"></div>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <div class="tab active" onclick="showTab('tabKeywords',this)">Keywords</div>
+          <div class="tab" onclick="showTab('tabSkills',this)">Skills Required</div>
+        </div>
+
+        <div id="tabKeywords">
+          <div class="section-head">Matched in your resume</div>
+          <div class="chips" id="matchedChips"></div>
+          <div class="section-head" style="margin-top:16px">Missing — will be added by AI</div>
+          <div class="chips" id="missingChips"></div>
+        </div>
+
+        <div id="tabSkills" style="display:none">
+          <div class="section-head">Top skills required by this role</div>
+          <div id="skillMeters"></div>
+        </div>
+      </div>
+
+      <!-- Professional Summary diff -->
+      <div class="card">
+        <div class="card-title">✏️ Professional Summary</div>
+        <div class="diff-grid">
+          <div class="diff-pane diff-original">
+            <div class="diff-pane-head">🟠 Original</div>
+            <textarea id="originalSummary" readonly></textarea>
+          </div>
+          <div class="diff-pane diff-tailored">
+            <div class="diff-pane-head">🟢 ATS-Tailored (editable)</div>
+            <textarea id="tailoredSummary"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Job 1 bullets -->
+      <div class="card">
+        <div class="card-title">🔧 Key Responsibilities — Most Recent Job</div>
+        <div class="diff-grid">
+          <div>
+            <div class="bullets-label">Existing bullets (last 3)</div>
+            <div id="job1OrigBullets" class="bullets-section"></div>
+          </div>
+          <div>
+            <div class="bullets-label">AI-added ATS bullets (editable)</div>
+            <div id="job1NewBullets" class="bullets-section"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Job 1 tech contributions -->
+      <div class="card">
+        <div class="card-title">⚙️ Technical Contributions — Most Recent Job</div>
+        <div class="diff-grid">
+          <div>
+            <div class="bullets-label">Existing contributions (last 3)</div>
+            <div id="job1OrigTechBullets" class="bullets-section"></div>
+          </div>
+          <div>
+            <div class="bullets-label">AI-added tech contributions (editable)</div>
+            <div id="job1NewTechBullets" class="bullets-section"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Job 2 bullets -->
+      <div class="card">
+        <div class="card-title">🔧 Key Responsibilities — Second Job</div>
+        <div class="diff-grid">
+          <div>
+            <div class="bullets-label">Existing bullets (last 3)</div>
+            <div id="job2OrigBullets" class="bullets-section"></div>
+          </div>
+          <div>
+            <div class="bullets-label">AI-added ATS bullets (editable)</div>
+            <div id="job2NewBullets" class="bullets-section"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Job 2 tech contributions -->
+      <div class="card">
+        <div class="card-title">⚙️ Technical Contributions — Second Job</div>
+        <div class="diff-grid">
+          <div>
+            <div class="bullets-label">Existing contributions (last 3)</div>
+            <div id="job2OrigTechBullets" class="bullets-section"></div>
+          </div>
+          <div>
+            <div class="bullets-label">AI-added tech contributions (editable)</div>
+            <div id="job2NewTechBullets" class="bullets-section"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;padding-top:4px">
+        <button class="btn btn-outline" onclick="goToStep(2,true)">← Re-select Resume</button>
+        <button class="btn btn-primary btn-lg" onclick="goToStep3()">
+          Continue → Generate &amp; Apply
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /step2 -->
+
+  <!-- ─────────────────── STEP 3: REVIEW & APPLY ─────────────────── -->
+  <div class="panel" id="step3">
+
+    <div class="card">
+      <div class="card-title">📋 Review &amp; Apply <span class="badge">Step 3 of 3</span></div>
+
+      <!-- Job summary pill -->
+      <div id="step3JobSummary" style="margin-bottom:20px"></div>
+
+      <!-- Generate docx -->
+      <div class="section-head">1. Generate tailored resume</div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:24px">
+        <button class="btn btn-outline" id="generateBtn" onclick="generateDocx()">
+          <span id="generateBtnTxt">⚙️ Generate Resume (.docx)</span>
+        </button>
+        <button class="btn btn-outline btn-sm" id="downloadBtn" style="display:none" onclick="downloadResume()">
+          ⬇️ Download Resume
+        </button>
+        <div id="generateStatus"></div>
+      </div>
+
+      <!-- Apply -->
+      <div class="section-head">2. Auto-apply to the job</div>
+      <div id="platformInfo" style="margin-bottom:12px"></div>
+
+      <div id="linkedinSessionWarning" style="display:none">
+        <div class="alert alert-warn">
+          ⚠️ No saved LinkedIn session found at <code>output/linkedin_session.json</code>.
+          Run <code>python3 login_linkedin.py</code> first to save your session, or be ready to log in manually when the browser opens.
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+        <button class="btn btn-success btn-lg" id="applyBtn" onclick="autoApply()" disabled>
+          <span id="applyBtnTxt">🚀 Auto-Apply</span>
+        </button>
+        <button class="btn btn-outline" onclick="window.open(document.getElementById('jobUrl').value,'_blank')">
+          🌐 Open Job Page
+        </button>
+      </div>
+
+      <!-- Apply log -->
+      <div id="applyLogWrap" style="display:none">
+        <div class="apply-log" id="applyLog"></div>
+      </div>
+
+      <!-- Final result -->
+      <div id="applyResult" style="display:none;margin-top:16px"></div>
+
+      <div class="action-bar">
+        <button class="btn btn-outline" onclick="goToStep(2)">← Back to Analysis</button>
+        <button class="btn btn-primary" onclick="startOver()">+ New Application</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ══════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════
+const S = {
+  step: 1,
+  job: { url:'', title:'', company:'', description:'' },
+  resumeKey: 'qa',
+  resumePath: null,         // path to selected/uploaded resume
+  resumePathOverride: null, // only set when user uploaded a custom file
+  analysis: null,
+  generatedPath: null,
+  config: null,
+};
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+async function init() {
+  try {
+    const r = await fetch('/api/config');
+    S.config = await r.json();
+    if (S.config.applicant?.name) {
+      document.getElementById('applicantInfo').innerHTML =
+        `<strong>${S.config.applicant.name}</strong><br>${S.config.applicant.email}`;
+    }
+    renderResumeGrid(S.config.resumes);
+    // set default resume path
+    const def = S.config.default_resume || 'qa';
+    S.resumeKey = def;
+    if (S.config.resumes[def]) S.resumePath = S.config.resumes[def].path;
+  } catch(e) {
+    console.error('Config load failed:', e);
+  }
+}
+
+function renderResumeGrid(resumes) {
+  const icons = { qa:'🧪', salesforce:'☁️', datacloud:'📊' };
+  const grid = document.getElementById('resumeGrid');
+  grid.innerHTML = '';
+  for (const [key, r] of Object.entries(resumes)) {
+    const card = document.createElement('div');
+    card.className = 'resume-card' + (key === S.resumeKey ? ' selected' : '');
+    card.dataset.key = key;
+    card.dataset.path = r.path;
+    card.innerHTML = `
+      <div class="resume-card-icon">${icons[key] || '📄'}</div>
+      <div>
+        <div class="resume-card-label">${r.label}</div>
+        ${r.exists
+          ? `<div class="resume-card-name">${r.name}</div>`
+          : `<div class="resume-card-missing">File not found</div>`}
+      </div>`;
+    card.onclick = () => selectResumeCard(key, r.path, card);
+    grid.appendChild(card);
+  }
+}
+
+function selectResumeCard(key, path, el) {
+  document.querySelectorAll('.resume-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  S.resumeKey = key;
+  S.resumePath = path;
+  S.resumePathOverride = null;
+  document.getElementById('uploadedResumeBadge').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════
+//  STEP NAVIGATION
+// ══════════════════════════════════════════════
+function goToStep(n, resetResults=false) {
+  if (n < 1 || n > 3) return;
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(`step${n}`).classList.add('active');
+  S.step = n;
+  updateStepBar(n);
+  window.scrollTo({top:0,behavior:'smooth'});
+  if (n === 2 && resetResults) {
+    document.getElementById('atsResults').style.display = 'none';
+    document.getElementById('resumeSelCard').style.display = '';
+  }
+}
+
+function updateStepBar(active) {
+  for (let i = 1; i <= 3; i++) {
+    const si = document.getElementById(`si${i}`);
+    si.className = 'step-item ' + (i < active ? 'done' : i === active ? 'active' : 'pending');
+    si.querySelector('.step-dot').textContent = i < active ? '✓' : i;
+  }
+  for (let i = 1; i <= 2; i++) {
+    document.getElementById(`sl${i}`).className = 'step-line' + (i < active ? ' done' : '');
+  }
+}
+
+// ══════════════════════════════════════════════
+//  STEP 1 — FETCH JOB
+// ══════════════════════════════════════════════
+async function fetchJob() {
+  const url = document.getElementById('jobUrl').value.trim();
+  if (!url) { showFetchAlert('warn', 'Enter a job URL first.'); return; }
+
+  const btn = document.getElementById('fetchBtn');
+  const txt = document.getElementById('fetchBtnTxt');
+  btn.disabled = true;
+  txt.innerHTML = '<span class="spin"></span> Fetching… (may take 15-30s for LinkedIn/Dice)';
+  hideFetchAlert();
+
+  try {
+    const r = await fetch('/api/scrape', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({url})
+    });
+    const d = await r.json();
+
+    const gotTitle   = d.title   && d.title.trim().length > 1;
+    const gotCompany = d.company && d.company.trim().length > 1;
+    const gotDesc    = d.description && d.description.trim().length > 100;
+
+    if (gotTitle)   document.getElementById('jobTitle').value   = d.title.trim();
+    if (gotCompany) document.getElementById('jobCompany').value = d.company.trim();
+    if (gotDesc)    document.getElementById('jobDescription').value = d.description.trim();
+
+    // Backend-provided error (e.g. wrong URL type)
+    if (d.error && !gotDesc) {
+      showFetchAlert('warn', '⚠️ ' + d.error);
+    } else if (gotTitle && gotDesc) {
+      showFetchAlert('success',
+        `✓ Fetched: "${d.title}"${gotCompany ? ' at ' + d.company : ''} — review and continue.`);
+    } else if (gotDesc && !gotTitle) {
+      showFetchAlert('info',
+        'Description extracted — please fill in Job Title and Company manually, then continue.');
+    } else if (!gotDesc) {
+      const isLinkedIn = url.includes('linkedin.com');
+      const isDice     = url.includes('dice.com');
+      if (isLinkedIn) {
+        showFetchAlert('warn',
+          '⚠️ Could not fetch job details. Make sure the URL is for a specific job posting ' +
+          '(linkedin.com/jobs/view/...), not the jobs feed. ' +
+          'If the job exists, run <code>python3 login_linkedin.py</code> once to save your session.');
+      } else if (isDice) {
+        showFetchAlert('warn',
+          '⚠️ Dice pages are JavaScript-rendered. Copy the job description from the page and paste it manually below.');
+      } else {
+        showFetchAlert('warn',
+          'Could not extract job details automatically. Please paste the job description below manually.');
+      }
+    }
+  } catch(e) {
+    showFetchAlert('warn', 'Network error — paste the job description manually below.');
+  }
+
+  btn.disabled = false;
+  txt.textContent = 'Fetch';
+}
+
+function showFetchAlert(type, msg) {
+  const el = document.getElementById('fetchAlert');
+  const cls = {info:'alert-info', warn:'alert-warn', success:'alert-success'}[type] || 'alert-info';
+  el.className = `alert ${cls}`;
+  el.textContent = msg;
+  el.style.display = 'flex';
+}
+function hideFetchAlert() { document.getElementById('fetchAlert').style.display = 'none'; }
+
+function goToStep2() {
+  const title = document.getElementById('jobTitle').value.trim();
+  const desc  = document.getElementById('jobDescription').value.trim();
+  if (!title) { alert('Please enter a job title.'); return; }
+  if (!desc)  { alert('Please paste the job description.'); return; }
+  S.job.url         = document.getElementById('jobUrl').value.trim();
+  S.job.title       = title;
+  S.job.company     = document.getElementById('jobCompany').value.trim();
+  S.job.description = desc;
+  goToStep(2);
+}
+
+// ══════════════════════════════════════════════
+//  RESUME UPLOAD
+// ══════════════════════════════════════════════
+function handleFileSelect(e) { if (e.target.files[0]) uploadFile(e.target.files[0]); }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropzone').classList.remove('drag-over');
+  if (e.dataTransfer.files[0]) uploadFile(e.dataTransfer.files[0]);
+}
+
+async function uploadFile(file) {
+  if (!file.name.endsWith('.docx')) { alert('Only .docx files supported'); return; }
+  const fd = new FormData();
+  fd.append('file', file);
+  const badge = document.getElementById('uploadedResumeBadge');
+  badge.innerHTML = '<span class="chip chip-blue"><span class="spin dark"></span> Uploading…</span>';
+  badge.style.display = 'block';
+  try {
+    const r = await fetch('/api/upload-resume', {method:'POST', body:fd});
+    const d = await r.json();
+    if (d.error) { badge.innerHTML = `<span class="chip chip-red">✗ ${d.error}</span>`; return; }
+    S.resumeKey = 'uploaded';
+    S.resumePath = d.path;
+    S.resumePathOverride = d.path;
+    document.querySelectorAll('.resume-card').forEach(c => c.classList.remove('selected'));
+    badge.innerHTML = `<span class="chip chip-green">✓ Using: ${d.name}</span>`;
+  } catch(e) {
+    badge.innerHTML = '<span class="chip chip-red">Upload failed</span>';
+  }
+}
+
+// ══════════════════════════════════════════════
+//  STEP 2 — ATS ANALYSIS
+// ══════════════════════════════════════════════
+async function runAnalysis() {
+  if (!S.resumePath) { alert('Select or upload a resume first.'); return; }
+
+  const btn = document.getElementById('analyzeBtn');
+  const txt = document.getElementById('analyzeBtnTxt');
+  btn.disabled = true;
+  txt.innerHTML = '<span class="spin"></span> Analyzing with AI… (30-60s)';
+
+  const payload = {
+    job_url: S.job.url,
+    job_title: S.job.title,
+    job_company: S.job.company,
+    job_description: S.job.description,
+    resume_key: S.resumeKey,
+  };
+  if (S.resumePathOverride) payload.resume_path = S.resumePathOverride;
+
+  try {
+    const r = await fetch('/api/analyze', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const d = await r.json();
+    if (d.error) { alert('Analysis failed: ' + d.error); btn.disabled=false; txt.textContent='Analyze with AI'; return; }
+
+    S.analysis = d;
+    S.resumePath = d.resume_path; // update to actual path used
+    renderAnalysis(d);
+
+    // hide selector, show results
+    document.getElementById('resumeSelCard').style.display = 'none';
+    document.getElementById('atsResults').style.display = 'block';
+  } catch(e) {
+    alert('Network error: ' + e.message);
+  }
+
+  btn.disabled = false;
+  txt.textContent = 'Analyze with AI';
+}
+
+function renderAnalysis(d) {
+  const ats = d.ats_analysis || {};
+  const tailored = d.tailored || {};
+  const matchBefore = d.match_pct_before || ats.match_percentage || 0;
+
+  // Score ring
+  const score = parseInt(ats.ats_score) || 0;
+  const circumference = 276.46;
+  const offset = circumference - (score / 10) * circumference;
+  document.getElementById('scoreNum').textContent = score;
+  document.getElementById('scoreArc').style.strokeDashoffset = offset;
+  document.getElementById('scoreArc').style.stroke = score >= 7 ? '#10b981' : score >= 5 ? '#f59e0b' : '#ef4444';
+
+  const matchColor = matchBefore >= 75 ? '#10b981' : matchBefore >= 60 ? '#f59e0b' : '#ef4444';
+  const targetPct  = Math.min(matchBefore + (100 - matchBefore) * 0.6, 95).toFixed(0); // rough after-tailor estimate
+  document.getElementById('jobPillLabel').innerHTML =
+    `ATS score for <strong>${S.job.title}</strong> @ <strong>${S.job.company || 'Unknown'}</strong>
+     <span style="margin-left:12px;font-size:13px;font-weight:600;color:${matchColor}">${matchBefore.toFixed(0)}% match before tailoring</span>
+     <span style="color:#94a3b8;font-size:12px"> → targeting 75%+ after</span>`;
+
+  if (ats.recommendation) {
+    const rec = document.getElementById('atsRecommendation');
+    rec.textContent = ats.recommendation;
+    rec.style.display = 'block';
+  }
+
+  // Keywords
+  const matched = ats.matched_keywords || [];
+  const missing  = ats.missing_keywords  || [];
+  document.getElementById('matchedChips').innerHTML =
+    matched.map(k => `<span class="chip chip-green">✓ ${k}</span>`).join('') || '<em style="color:#94a3b8;font-size:13px">None detected</em>';
+  document.getElementById('missingChips').innerHTML =
+    missing.map(k => `<span class="chip chip-red">✗ ${k}</span>`).join('') || '<em style="color:#94a3b8;font-size:13px">None — great match!</em>';
+
+  // Skills meters
+  const skills = ats.top_skills || [];
+  document.getElementById('skillMeters').innerHTML = skills.map((s,i) => {
+    const pct = Math.max(40, 100 - i * 12);
+    return `<div class="skill-meter">
+      <div class="skill-name">${s}</div>
+      <div class="skill-bar"><div class="skill-bar-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+
+  // Summary diff
+  document.getElementById('originalSummary').value = d.original_summary || '(Not found in document)';
+  document.getElementById('tailoredSummary').value  = tailored.summary  || '';
+
+  // Bullets — Key Responsibilities
+  renderBullets('job1OrigBullets', d.job1_original_bullets || [], true);
+  renderBullets('job1NewBullets',  tailored.job1_bullets    || [], false);
+  renderBullets('job2OrigBullets', d.job2_original_bullets || [], true);
+  renderBullets('job2NewBullets',  tailored.job2_bullets    || [], false);
+
+  // Bullets — Technical Contributions
+  renderBullets('job1OrigTechBullets', d.job1_tech_original_bullets || [], true);
+  renderBullets('job1NewTechBullets',  tailored.job1_tech_bullets   || [], false);
+  renderBullets('job2OrigTechBullets', d.job2_tech_original_bullets || [], true);
+  renderBullets('job2NewTechBullets',  tailored.job2_tech_bullets   || [], false);
+}
+
+function renderBullets(containerId, bullets, readonly) {
+  const el = document.getElementById(containerId);
+  if (!bullets.length) {
+    el.innerHTML = '<div style="color:#94a3b8;font-size:13px;padding:8px 0">None</div>';
+    return;
+  }
+  el.innerHTML = bullets.map((b, i) => `
+    <div class="bullet-row">
+      <div class="bullet-num ${readonly ? 'gray' : ''}">${i+1}</div>
+      <textarea ${readonly ? 'readonly' : ''}>${b}</textarea>
+    </div>`).join('');
+}
+
+function showTab(tabId, el) {
+  document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  ['tabKeywords','tabSkills'].forEach(id => {
+    document.getElementById(id).style.display = id === tabId ? '' : 'none';
+  });
+}
+
+// ══════════════════════════════════════════════
+//  STEP 3 — GENERATE & APPLY
+// ══════════════════════════════════════════════
+function goToStep3() {
+  // Collect edited values back into S.analysis.tailored
+  if (S.analysis) {
+    S.analysis.tailored.summary = document.getElementById('tailoredSummary').value;
+    S.analysis.tailored.job1_bullets = collectBullets('job1NewBullets');
+    S.analysis.tailored.job2_bullets = collectBullets('job2NewBullets');
+    S.analysis.tailored.job1_tech_bullets = collectBullets('job1NewTechBullets');
+    S.analysis.tailored.job2_tech_bullets = collectBullets('job2NewTechBullets');
+  }
+
+  // Populate step 3 UI
+  const platform = detectPlatformLabel(S.job.url);
+  document.getElementById('step3JobSummary').innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <span class="chip chip-blue" style="font-size:13px">📋 ${S.job.title || 'Unknown Title'}</span>
+      <span class="chip chip-gray" style="font-size:13px">🏢 ${S.job.company || 'Unknown Company'}</span>
+      <span class="platform-badge">🌐 ${platform}</span>
+    </div>`;
+
+  document.getElementById('platformInfo').innerHTML =
+    getPlatformNote(platform.toLowerCase());
+
+  const sessionExists = false; // we'll check server-side; show warning by default for LinkedIn
+  if (platform.toLowerCase() === 'linkedin') {
+    document.getElementById('linkedinSessionWarning').style.display = 'block';
+  }
+
+  goToStep(3);
+}
+
+function collectBullets(containerId) {
+  return Array.from(document.querySelectorAll(`#${containerId} textarea`))
+    .map(t => t.value.trim()).filter(Boolean);
+}
+
+function detectPlatformLabel(url) {
+  if (!url) return 'Unknown';
+  if (url.includes('linkedin.com'))  return 'LinkedIn';
+  if (url.includes('indeed.com'))    return 'Indeed';
+  if (url.includes('greenhouse.io')) return 'Greenhouse';
+  if (url.includes('lever.co'))      return 'Lever';
+  if (url.includes('dice.com'))      return 'Dice';
+  if (url.includes('workday'))       return 'Workday';
+  return 'Other';
+}
+
+function getPlatformNote(platform) {
+  const notes = {
+    linkedin: `<div class="alert alert-info">LinkedIn Easy Apply will be used. The browser will open and attempt to click Easy Apply automatically.</div>`,
+    greenhouse: `<div class="alert alert-success">Greenhouse ATS — full form automation supported (name, email, phone, resume upload).</div>`,
+    lever: `<div class="alert alert-success">Lever ATS — full form automation supported.</div>`,
+    indeed: `<div class="alert alert-warn">Indeed requires manual login. Browser will open the job page for you to apply.</div>`,
+    dice: `<div class="alert alert-warn">Dice — browser will open; some portals require manual completion.</div>`,
+  };
+  return notes[platform] || `<div class="alert alert-info">Browser will open the job page. Manual steps may be required for this portal.</div>`;
+}
+
+async function generateDocx() {
+  const btn = document.getElementById('generateBtn');
+  const txt = document.getElementById('generateBtnTxt');
+  const status = document.getElementById('generateStatus');
+  btn.disabled = true;
+  txt.innerHTML = '<span class="spin dark"></span> Generating & scoring…';
+  status.innerHTML = '';
+
+  try {
+    const r = await fetch('/api/generate', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        resume_path: S.resumePath,
+        tailored: S.analysis?.tailored || {},
+        job: { title: S.job.title, company: S.job.company, url: S.job.url },
+        job_description: S.job.description,
+      })
+    });
+    const d = await r.json();
+    if (d.error) { status.innerHTML = `<span class="chip chip-red">✗ ${d.error}</span>`; btn.disabled=false; return; }
+
+    S.generatedPath = d.output_path;
+    txt.innerHTML = '✓ Resume Generated';
+    document.getElementById('downloadBtn').style.display = '';
+    document.getElementById('applyBtn').disabled = false;
+
+    // Show ATS score of the final document
+    const ats = d.ats_after || {};
+    const pct = ats.match_percentage || 0;
+    const matchedCount = (ats.matched_keywords || []).length;
+    const missingCount = (ats.missing_keywords || []).length;
+    const color = pct >= 75 ? '#10b981' : pct >= 60 ? '#f59e0b' : '#ef4444';
+    const badge = pct >= 75 ? '✓ Target met' : '⚠ Below 75%';
+
+    status.innerHTML = `
+      <span class="chip chip-green">✓ ${d.filename}</span>
+      ${pct ? `<span style="margin-left:10px;font-weight:700;color:${color};font-size:14px">
+        ATS match of generated resume: ${pct.toFixed(0)}% ${pct >= 75 ? '✓' : ''}
+      </span>
+      <span style="color:#64748b;font-size:12px;margin-left:8px">${matchedCount} matched · ${missingCount} missing</span>` : ''}`;
+
+    // If still below 75%, show the missing keywords
+    if (pct > 0 && pct < 75 && ats.missing_keywords?.length) {
+      status.innerHTML += `<div style="margin-top:8px">
+        <span style="font-size:12px;color:#64748b">Still missing: </span>
+        ${ats.missing_keywords.map(k => `<span class="chip chip-red" style="font-size:11px">${k}</span>`).join(' ')}
+      </div>`;
+    }
+  } catch(e) {
+    status.innerHTML = `<span class="chip chip-red">Error: ${e.message}</span>`;
+    txt.innerHTML = '⚙️ Generate Resume (.docx)';
+    btn.disabled = false;
+  }
+}
+
+function downloadResume() {
+  if (!S.generatedPath) return;
+  window.location.href = `/api/download?path=${encodeURIComponent(S.generatedPath)}`;
+}
+
+async function autoApply() {
+  const btn = document.getElementById('applyBtn');
+  const txt = document.getElementById('applyBtnTxt');
+  btn.disabled = true;
+  txt.innerHTML = '<span class="spin"></span> Launching…';
+
+  const logWrap = document.getElementById('applyLogWrap');
+  const log     = document.getElementById('applyLog');
+  const result  = document.getElementById('applyResult');
+  logWrap.style.display = 'block';
+  log.innerHTML = '';
+  result.style.display = 'none';
+
+  try {
+    const r = await fetch('/api/apply', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        job_url:    S.job.url,
+        job_title:  S.job.title,
+        company:    S.job.company,
+        resume_path: S.generatedPath || S.resumePath,
+      })
+    });
+    const {session_id} = await r.json();
+
+    const es = new EventSource(`/api/apply-status/${session_id}`);
+    es.onmessage = (e) => {
+      const msg = JSON.parse(e.data);
+      appendLog(log, msg);
+      if (msg.done) {
+        es.close();
+        btn.disabled = false;
+        txt.innerHTML = '🚀 Auto-Apply';
+        renderApplyResult(result, msg);
+        result.style.display = 'block';
+      }
+    };
+    es.onerror = () => {
+      es.close();
+      appendLog(log, {status:'error', msg:'Connection lost'});
+      btn.disabled = false;
+      txt.innerHTML = '🚀 Auto-Apply';
+    };
+  } catch(e) {
+    appendLog(log, {status:'error', msg:e.message});
+    btn.disabled = false;
+    txt.innerHTML = '🚀 Auto-Apply';
+  }
+}
+
+function appendLog(container, msg) {
+  const cls = {
+    starting:'info', browser:'info', session:'ok', warn:'warn',
+    navigating:'nav', applied:'ok', error:'err', manual_review:'warn',
+    skipped:'warn', timeout:'warn'
+  }[msg.status] || 'info';
+  const ts = new Date().toLocaleTimeString();
+  const line = document.createElement('div');
+  line.className = `log-line ${cls}`;
+  line.innerHTML = `<span class="ts">[${ts}]</span><span class="msg">${escHtml(msg.msg || msg.status)}</span>`;
+  container.appendChild(line);
+  container.scrollTop = container.scrollHeight;
+}
+
+function renderApplyResult(el, msg) {
+  const map = {
+    applied:       {cls:'success', icon:'🎉', title:'Application Submitted!',    body:'Your application was submitted successfully.'},
+    manual_review: {cls:'warn',    icon:'👀', title:'Requires Manual Review',    body:'The browser is open — complete the application manually.'},
+    skipped:       {cls:'warn',    icon:'⏭️', title:'Could Not Auto-Complete',   body:'Multi-step form — finish manually in the browser window.'},
+    error:         {cls:'error',   icon:'❌', title:'Error',                      body:''},
+    timeout:       {cls:'error',   icon:'⏰', title:'Timed Out',                  body:'The application took too long to process.'},
+  };
+  const info = map[msg.status] || {cls:'pending', icon:'ℹ️', title:msg.status, body:''};
+  el.innerHTML = `
+    <div class="result-card ${info.cls}">
+      <div class="result-icon">${info.icon}</div>
+      <div>
+        <div class="result-title">${info.title}</div>
+        <div class="result-body">${info.body}${msg.msg ? ' — ' + escHtml(msg.msg) : ''}</div>
+      </div>
+    </div>`;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function startOver() {
+  // Reset all state
+  S.step=1; S.job={url:'',title:'',company:'',description:''};
+  S.resumeKey='qa'; S.resumePath=null; S.resumePathOverride=null;
+  S.analysis=null; S.generatedPath=null;
+  document.getElementById('jobUrl').value='';
+  document.getElementById('jobTitle').value='';
+  document.getElementById('jobCompany').value='';
+  document.getElementById('jobDescription').value='';
+  hideFetchAlert();
+  document.getElementById('atsResults').style.display='none';
+  document.getElementById('resumeSelCard').style.display='';
+  document.getElementById('generateStatus').innerHTML='';
+  document.getElementById('downloadBtn').style.display='none';
+  document.getElementById('applyBtn').disabled=true;
+  document.getElementById('applyLogWrap').style.display='none';
+  document.getElementById('applyResult').style.display='none';
+  document.getElementById('generateBtnTxt').innerHTML='⚙️ Generate Resume (.docx)';
+  document.getElementById('generateBtn').disabled=false;
+  document.getElementById('linkedinSessionWarning').style.display='none';
+  if (S.config) renderResumeGrid(S.config.resumes);
+  goToStep(1);
+}
+
+// ══════════════════════════════════════════════
+//  START
+// ══════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
