@@ -92,7 +92,7 @@ fi
 
 echo ""
 if [ "$SUCCESS" -eq "1" ]; then
-    echo "Chrome is open with your Sravan profile."
+    echo "Chrome is open with your profile."
     echo "Make sure you are logged into LinkedIn in the Chrome window."
 fi
 echo "Press Enter when ready to start applying..."
