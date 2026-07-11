@@ -32,7 +32,7 @@ HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
         "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/124.0.0.0 Safari/537.36"
+        "Chrome/137.0.0.0 Safari/537.36"
     ),
     "Accept-Language": "en-US,en;q=0.9",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
@@ -44,6 +44,14 @@ HEADERS = {
 # ---------------------------------------------------------------------------
 # Title relevance pre-filter
 # ---------------------------------------------------------------------------
+
+# Words too generic to distinguish relevant titles from irrelevant ones
+GENERIC_WORDS = {
+    "senior", "junior", "lead", "staff", "principal",
+    "engineer", "developer", "specialist", "analyst", "manager",
+    "consultant", "associate", "remote", "hybrid", "onsite",
+    "mid", "level",
+}
 
 # Roles that are never relevant regardless of keyword matches
 BLOCKLIST = {
@@ -65,22 +73,26 @@ BLOCKLIST = {
 
 def build_keywords(config: dict) -> set[str]:
     """
-    Extract root keywords from config job_titles.
-    e.g. ["Senior QA Engineer", "Salesforce Developer"] →
-         {"qa", "quality", "salesforce", "test", "engineer", "developer", ...}
+    Extract distinctive keywords from config job_titles, skipping generic words
+    that would let irrelevant titles pass the title_is_relevant() filter.
+    Also merges extra_keywords from config (list of strings).
     """
     keywords: set[str] = set()
     for title in config.get("job_titles", []):
         for word in title.lower().split():
-            if len(word) > 2:
+            if len(word) > 2 and word not in GENERIC_WORDS:
                 keywords.add(word)
 
-    # Always include these core QA/Salesforce root terms
+    # Core QA/Salesforce terms always included (not in generic titles, so safe)
     keywords.update({
         "qa", "qe", "quality", "assurance", "test", "testing", "tester",
         "automation", "salesforce", "sfdc", "sfdx", "sfqa",
-        "contract", "c2c", "c2h",
     })
+
+    # Caller-supplied extras — add domain-specific terms in config.yaml
+    # under extra_keywords: ["selenium", "cypress", ...] without touching code
+    keywords.update(kw.lower() for kw in config.get("extra_keywords", []))
+
     return keywords
 
 
@@ -98,8 +110,6 @@ def title_is_relevant(title: str, keywords: set[str], blocklist: set[str]) -> bo
     has_block = any(bl in lower for bl in blocklist)
 
     if not has_keyword:
-        return False
-    if has_block and not has_keyword:
         return False
 
     # Edge case: "QA Director" — has keyword "qa" but also "director"

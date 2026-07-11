@@ -18,6 +18,7 @@ import yaml
 from bs4 import BeautifulSoup
 
 from claude_cli import call_claude_json
+from agent_scraper import build_keywords, title_is_relevant, BLOCKLIST
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [relevance] %(message)s")
 log = logging.getLogger(__name__)
@@ -30,7 +31,7 @@ CONFIG_FILE = Path("config.yaml")
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
     )
 }
 
@@ -409,11 +410,19 @@ def run(jobs: list[dict] | None = None) -> list[dict]:
         log.info("Min annual salary filter: $%.0f/yr", min_annual)
     log.info("Max days old filter: %d days", max_days)
 
+    keywords = build_keywords(config)
+
     scored_jobs: list[dict] = []
     evaluated_ids: list[str] = []
 
     for i, job in enumerate(jobs, 1):
         log.info("[%d/%d] Checking '%s' @ %s", i, len(jobs), job["title"], job["company"])
+
+        # Zero-cost pre-gate: skip before any network call
+        if not title_is_relevant(job["title"], keywords, BLOCKLIST):
+            log.info("  → Skipping (title not relevant)")
+            evaluated_ids.append(job["id"])
+            continue
 
         is_open = is_job_still_open(job["url"])
         if not is_open:

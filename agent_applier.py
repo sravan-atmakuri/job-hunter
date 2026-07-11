@@ -344,7 +344,13 @@ def apply_linkedin(page, job: dict, applicant: dict) -> dict:
                     next_btn.scroll_into_view_if_needed()
                     next_btn.click()
                     page.wait_for_timeout(1500)
-                    # Detect if page didn't advance (validation error shown)
+                    # Detect inline validation errors immediately (faster than HTML diff)
+                    if page.query_selector(".artdeco-inline-feedback--error"):
+                        return {
+                            "status": "manual_review",
+                            "reason": f"Easy Apply step {step_num + 1} has validation errors — complete manually",
+                        }
+                    # Fallback: detect if page didn't advance at all
                     current_html = page.inner_html("body")[:500]
                     if current_html == prev_page_html:
                         return {
@@ -633,7 +639,7 @@ def run(resume_map: dict | None = None, dry_run: bool = False) -> list[dict]:
                     "user_agent": (
                         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
                         "AppleWebKit/537.36 (KHTML, like Gecko) "
-                        "Chrome/124.0.0.0 Safari/537.36"
+                        "Chrome/137.0.0.0 Safari/537.36"
                     ),
                 }
                 if SESSION_FILE.exists():
