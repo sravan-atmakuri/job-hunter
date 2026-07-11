@@ -83,14 +83,8 @@ def build_keywords(config: dict) -> set[str]:
             if len(word) > 2 and word not in GENERIC_WORDS:
                 keywords.add(word)
 
-    # Core QA/Salesforce terms always included (not in generic titles, so safe)
-    keywords.update({
-        "qa", "qe", "quality", "assurance", "test", "testing", "tester",
-        "automation", "salesforce", "sfdc", "sfdx", "sfqa",
-    })
-
-    # Caller-supplied extras — add domain-specific terms in config.yaml
-    # under extra_keywords: ["selenium", "cypress", ...] without touching code
+    # Merge extra_keywords from config — this is where all domain-specific
+    # terms live (QA, Salesforce, etc.) so the code stays role-agnostic.
     keywords.update(kw.lower() for kw in config.get("extra_keywords", []))
 
     return keywords
@@ -112,8 +106,10 @@ def title_is_relevant(title: str, keywords: set[str], blocklist: set[str]) -> bo
     if not has_keyword:
         return False
 
-    # Edge case: "QA Director" — has keyword "qa" but also "director"
-    # Keep it only if a core QA/test/salesforce word is present
+    # Edge case: "QA Director" — has keyword "qa" but also "director".
+    # Keep it only if a strong domain word is present. This set is intentionally
+    # kept in-code (not config-driven) because it guards the blocklist override,
+    # not general title matching — changing it requires understanding the logic.
     core = {"qa", "qe", "quality", "test", "salesforce", "sfdc", "automation"}
     if has_block:
         return any(c in lower for c in core)

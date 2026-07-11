@@ -11,6 +11,26 @@ job_titles:
   - "Salesforce Developer"
   - "Salesforce Administrator"
 
+# Extra keywords used by the title pre-filter (title_is_relevant) to decide
+# which scraped job titles are worth scoring. Add distinctive, role-specific
+# terms here — abbreviations, tools, and niche role words that won't appear in
+# generic titles. Generic words like "senior", "engineer", "developer" are
+# already excluded automatically; only add terms that uniquely identify your
+# target roles. No code change required to update this list.
+extra_keywords:
+  - "qa"           # QA / quality assurance
+  - "qe"
+  - "quality"
+  - "assurance"
+  - "test"
+  - "testing"
+  - "tester"
+  - "automation"
+  - "salesforce"   # Salesforce platform roles
+  - "sfdc"
+  - "sfdx"
+  - "sfqa"
+
 target_states:
   - "FL"
   - "Remote"
